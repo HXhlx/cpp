@@ -3,10 +3,10 @@
 #include<string>
 class Staff
 {
-	std::string wage, id, name, gender, department, occupation, phone, adress;
-	unsigned age;
+	std::string id, name, gender, department, occupation, phone, adress;
+	unsigned wage, age;
 public:
-	Staff();
-	~Staff();
+	void Input();
+	void Print();
 };
 #endif
