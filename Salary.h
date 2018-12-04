@@ -5,7 +5,7 @@ class Salary :public Staff
 {
 	int basic, duty, bonus;
 public:
-	Salary();
-	~Salary();
+	void Input();
+	void Print();
 };
 #endif
