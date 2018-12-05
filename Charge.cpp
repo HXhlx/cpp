@@ -5,3 +5,4 @@ Charge::Charge()
 Charge::~Charge()
 {
 }
+
