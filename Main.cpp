@@ -17,7 +17,8 @@ bool Input(vector<Charge>&staff)
 	{
 		if (staff.empty())s.Staff::Input(Staff());
 		else s.Staff::Input(staff.back());
-		for (vector<Charge>::iterator r = staff.begin(); r != staff.end(); r++)if (*r == s)
+		vector<Charge>::iterator r = find(staff.begin(), staff.end(), s);
+		if (r != staff.end())
 		{
 			cerr << "姓名或者身份证号重复,添加员工失败" << endl;
 			return false;
@@ -25,9 +26,11 @@ bool Input(vector<Charge>&staff)
 		staff.push_back(s);
 		cout << "是否继续添加员工?(y or n):";
 		cin >> c;
+		cout << endl;
 	} while (c == 'y');
+	return true;
 }
-void Modify(Administrator administrator,vector<Charge>&staff,int t)
+void Modify(Administrator administrator, vector<Charge>&staff, int t)
 {
 	char c;
 	Charge s;
@@ -51,6 +54,33 @@ void Modify(Administrator administrator,vector<Charge>&staff,int t)
 		cin >> c;
 	} while (c == 'y');
 }
+void Print(int t)
+{
+	getchar();
+	cout << "请按任意键继续";
+	getchar();
+	system("cls");
+	if (t == 1)
+	{
+		cout << "-----------*****公司(管理员专用)------------" << endl;
+		cout << "| 1.添加员工基本信息   2.员工工资数据录入  |" << endl;
+		cout << "| 3.员工费用数据录入   4.员工基本信息修改  |" << endl;
+		cout << "| 5.员工工资信息修改   6.员工费用信息修改  |" << endl;
+		cout << "| 7.按员工基本信息查询 8.按员工工资信息查询|" << endl;
+		cout << "| 9.按员工费用信息查询10.显示所有员工信息  |" << endl;
+		cout << "|11.统计总工资        12.删除员工数据      |" << endl;
+		cout << "|13.修改密码          14.添加管理员信息    |" << endl;
+		cout << "|15.删除管理员信息    16.保存更改并退出程序|" << endl;
+	}
+	else if (t == 2)
+	{
+		cout << "----------*****公司(员工专用)------------" << endl;
+		cout << "|1.基本信息查询     2.应发工资查询      |" << endl;
+		cout << "|3.基本信息修改     4.打印工资单        |" << endl;
+		cout << "|5.修改密码         6.保存更改并退出程序|" << endl;
+	}
+	cout << "请选择操作:";
+}
 int main()
 {
 	bool b;
@@ -62,16 +92,18 @@ int main()
 	fstream ainout("administrator.bin"), uinout("staff.bin");
 	list<Administrator>adm;
 	vector<Charge>staff;
-	if (ainout.fail() || uinout.fail())
+	vector<Salary>salary;
+	vector<Staff>sta;
+	if (ainout.fail() && uinout.fail())
 	{
-		cerr << "文件打开失败,程序将异常退出";
+		cerr << "公司已倒闭，数据已清空";
 		return EXIT_FAILURE;
 	}
 	ainout >> a;
 	uinout >> u;
 	if (a == "")
 	{
-		cerr << "找不到管理员信息,程序将异常退出";
+		cerr << "系统找不到管理员信息,程序无法使用";
 		return EXIT_FAILURE;
 	}
 	else if (u == "")goto first;
@@ -98,16 +130,10 @@ int main()
 						cin >> c;
 						if (c == 'y')Charge::In(uinout, staff);
 					}
-					cout << "****公司（管理员专用）" << endl;
-					cout << "1.添加员工基本信息	2.员工工资数据录入" << endl;
-					cout << "3.员工费用数据录入	4.员工基本信息修改" << endl;
-					cout << "5.员工工资信息修改	6.员工费用信息修改" << endl;
-					cout << "7.查询员工信息		8.删除员工数据" << endl;
-					cout << "9.修改密码			10.添加管理员信息" << endl;
-					cout << "11.删除管理员信息	12.保存更改并退出程序" << endl;
-					cout << "请选择操作:";
+					Print(i);
 					while (cin >> t)
 					{
+						cout << endl;
 						switch (t)
 						{
 						case 1:Input(staff); break;
@@ -117,19 +143,23 @@ int main()
 						case 5:
 						case 6:Modify(administrator, staff, t); break;
 						case 7:
-							for (vector<Charge>::iterator r = staff.begin(); r != staff.end(); r++)
-							{
-								(*r).Staff::Print();
-								(*r).Print();
-							}
+							for (vector<Charge>::iterator r = staff.begin(); r != staff.end(); r++)sta.push_back(*r);
+							Staff::Find(sta);
 							break;
-						case 8:s.Delete(staff); break;
-						case 9:administrator.Change(adm); break;
-						case 10:administrator.Input(adm); break;
-						case 11:
+						case 8:
+							for (vector<Charge>::iterator r = staff.begin(); r != staff.end(); r++)salary.push_back(*r);
+							Salary::Find(salary);
+							break;
+						case 9:Charge::Find(staff); break;
+						case 10:for (vector<Charge>::iterator r = staff.begin(); r != staff.end(); r++)(*r).Print();
+						case 11:Charge::Statistics(staff); break;
+						case 12:s.Delete(staff); break;
+						case 13:administrator.Change(adm); break;
+						case 14:administrator.Input(adm); break;
+						case 15:
 							b = administrator.Delete(adm);
 							if (b == false)break;
-						case 12:
+						case 16:
 							ainout.close();
 							ainout.open("administrator.bin", fstream::out);
 							uinout.close();
@@ -141,12 +171,15 @@ int main()
 							}
 							Administrator::Save(ainout, adm);
 							if (adm.empty())cout << "管理员为空,系统将清除所有用户信息!";
-							else Charge::Save(uinout, staff);
-							cout << "退出成功!";
+							else
+							{
+								Charge::Save(uinout, staff);
+								cout << "退出成功,信息已保存";
+							}
 							return EXIT_SUCCESS;
 						default:return EXIT_FAILURE;
 						}
-						cout << "请选择操作:";
+						Print(i);
 					}
 				}
 				else cerr << "登录名或密码错误,请重新输入" << endl;
@@ -155,16 +188,13 @@ int main()
 			{
 				Charge::In(uinout, staff);
 				n = Charge::Login(staff);
-				if (n != staff.size())
+				if (n != EOF)
 				{
 					int t;
-					cout << "****公司（员工专用）" << endl;
-					cout << "1.基本信息查询	2.工资数据查询" << endl;
-					cout << "3.基本信息修改	4.打印工资单" << endl;
-					cout << "5.修改密码	6.保存更改并退出程序" << endl;
-					cout << "请选择操作:";
+					Print(i);
 					while (cin >> t)
 					{
+						cout << endl;
 						switch (t)
 						{
 						case 1:staff[n].Staff::Print(); break;
@@ -176,11 +206,11 @@ int main()
 							uinout.close();
 							uinout.open("staff.bin", fstream::out);
 							Charge::Save(uinout, staff);
-							cout << "退出成功!";
+							cout << "退出成功,信息已保存";
 							return EXIT_SUCCESS;
 						default:return EXIT_FAILURE;
 						}
-						cout << "请选择操作:";
+						Print(i);
 					}
 				}
 				else cerr << "工资卡号/姓名/身份证号或密码错误,请重新输入" << endl;
