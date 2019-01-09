@@ -11,11 +11,18 @@ void Administrator::In(fstream&is, list<Administrator>&adm)
 }
 void Administrator::Input(list<Administrator>&adm)
 {
-	cout << "请输入用户名:";
-	cin >> name;
-	cout << "请输入密码:";
-	cin >> password;
-	adm.push_back(*this);
+	char c = 'y';
+	Administrator Adm;
+	do
+	{
+		cout << "请输入用户名:";
+		cin >> Adm.name;
+		cout << "请输入密码:";
+		cin >> Adm.password;
+		adm.push_back(Adm);
+		cout << endl << "是否继续添加管理员?";
+		cin >> c;
+	} while (c == 'y');
 }
 Administrator Administrator::Login(list<Administrator>adm)
 {
@@ -40,12 +47,14 @@ seventh:
 	cin >> k;
 	if (k != password)
 	{
-		cerr << "密码输入错误,请重新输入";
+		cerr << "密码输入错误,请重新输入:";
 		goto seventh;
 	}
 eighth:
 	cout << "请输入新密码:";
-	cin >> k >> p;
+	cin >> k;
+	cout << "请再次输入新密码:";
+	cin >> p;
 	if (k == p)
 	{
 		cout << "密码修改成功" << endl;
@@ -62,14 +71,13 @@ bool Administrator::Delete(list<Administrator>&adm)
 {
 	char c;
 	string n, k;
-sixth:
 	cout << "请输入登录名和密码:" << endl;
 	cin >> n >> k;
 	list<Administrator>::iterator r = find(adm.begin(), adm.end(), Administrator(n, k));
 	if (r == adm.end())
 	{
-		cerr << "登录名或密码输入错误,请重新输入" << endl;
-		goto sixth;
+		cerr << "删除失败" << endl;
+		return false;
 	}
 	else if (*r == *this)
 	{
@@ -78,7 +86,7 @@ sixth:
 		if (c == 'y')
 		{
 			adm.erase(r);
-			cout << "删除成功,程序将自动退出!";
+			cout << "删除成功,程序将自动退出!" << endl;
 			return true;
 		}
 	}
@@ -93,8 +101,6 @@ sixth:
 			return false;
 		}
 	}
-	cerr << "删除失败";
-	return false;
 }
 void Administrator::Save(fstream &os, list<Administrator>&adm)
 {
@@ -102,11 +108,15 @@ void Administrator::Save(fstream &os, list<Administrator>&adm)
 }
 void Administrator::ModifyStaff(Staff &s)
 {
-	int t = 0;
-	string newi;
-	cout << "请选择你需要修改的信息（部门==1，职称==2）" << endl;
-	cin >> t >> newi;
-	if (t == 1)s.department = newi;
-	else if (t == 2)s.occupation = newi;
-	else cout << "输入出错，请重新选择要修改的信息" << endl;
+	int t;
+	cout << "请选择你需要修改的信息（1.身份证号2.姓名,3.部门,4.职位）" << endl;
+	cin >> t;
+	switch (t)
+	{
+	case 1:cout << "请输入新的身份证号:"; cin >> s.id; break;
+	case 2:cout << "请输入新的姓名:"; cin >> s.name; break;
+	case 3:cout << "请输入新的部门:"; cin >> s.department; break;
+	case 4:cout << "请输入新的职位:"; cin >> s.occupation; break;
+	default:cout << "输入出错，修改失败" << endl;
+	}
 }
