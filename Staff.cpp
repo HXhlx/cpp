@@ -103,8 +103,7 @@ void Staff::Print()
 }
 bool operator==(Staff A, Staff B)
 {
-	if (A.wage == B.wage || A.name == B.name || A.id == B.id)return true;
-	else return false;
+	return A.wage == B.wage || A.name == B.name || A.id == B.id;
 }
 void Staff::Change()
 {
