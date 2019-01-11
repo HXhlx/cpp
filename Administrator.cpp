@@ -36,8 +36,7 @@ Administrator Administrator::Login(list<Administrator>adm)
 }
 bool operator==(Administrator A, Administrator B)
 {
-	if (A.name == B.name&&A.password == B.password)return true;
-	else return false;
+	return A.name == B.name&&A.password == B.password;
 }
 void Administrator::Change(list<Administrator>&adm)
 {
