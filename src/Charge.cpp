@@ -1,12 +1,13 @@
+module;
 #include <algorithm>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <string>
 #include <vector>
-#include "Charge.h"
+module WageSystem;
 
-// ── 序列化辅助：空字符串用 "-" 占位 ──
+// ── 序列化辅助（保留兼容旧格式） ──
 static std::string SafeStr(const std::string& s) {
     return s.empty() ? "-" : s;
 }
@@ -30,39 +31,6 @@ int Charge::Login(std::vector<Charge>& staff) {
             return static_cast<int>(i);
     }
     return EOF;
-}
-
-void Charge::In(std::fstream& is, std::vector<Charge>& staff) {
-    Charge s;
-    while (is >> s.wage_ >> s.id_ >> s.name_ >> s.gender_ >> s.age_
-              >> s.department_ >> s.occupation_ >> s.phone_ >> s.address_
-              >> s.basic_ >> s.duty_ >> s.bonus_ >> s.salarysum_
-              >> s.water_ >> s.electricity_ >> s.medicare_
-              >> s.rax_ >> s.realsalary_ >> s.password_) {
-        s.id_          = LoadStr(s.id_);
-        s.name_        = LoadStr(s.name_);
-        s.gender_      = LoadStr(s.gender_);
-        s.department_  = LoadStr(s.department_);
-        s.occupation_  = LoadStr(s.occupation_);
-        s.phone_       = LoadStr(s.phone_);
-        s.address_     = LoadStr(s.address_);
-        s.password_    = LoadStr(s.password_);
-        s.Calculate();
-        staff.push_back(s);
-    }
-}
-
-void Charge::Save(std::fstream& os, std::vector<Charge>& staff) {
-    for (auto& s : staff) {
-        s.Calculate();
-        os << s.wage_ << " " << SafeStr(s.id_) << " " << SafeStr(s.name_) << " "
-           << SafeStr(s.gender_) << " " << s.age_ << " " << SafeStr(s.department_) << " "
-           << SafeStr(s.occupation_) << " " << SafeStr(s.phone_) << " " << SafeStr(s.address_) << " "
-           << s.basic_ << " " << s.duty_ << " " << s.bonus_ << " "
-           << s.salarysum_ << " " << s.water_ << " " << s.electricity_ << " "
-           << s.medicare_ << " " << s.rax_ << " " << s.realsalary_ << " "
-           << SafeStr(s.password_) << "\n";
-    }
 }
 
 void Charge::Calculate() {

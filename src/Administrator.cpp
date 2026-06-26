@@ -1,8 +1,9 @@
+module;
 #include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <list>
-#include "Administrator.h"
+module WageSystem;
 
 Administrator::Administrator(const std::string& n, const std::string& p)
     : name_(n), password_(p) {}
@@ -36,9 +37,6 @@ Administrator Administrator::Login(const std::list<Administrator>& adm) {
     return *it;
 }
 
-bool operator==(const Administrator& a, const Administrator& b) {
-    return a.name_ == b.name_ && a.password_ == b.password_;
-}
 
 void Administrator::Change(std::list<Administrator>& adm) {
     std::string k, p;

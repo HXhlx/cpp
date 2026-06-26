@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
+import WageSystem;
 #include <fstream>
 #include <sstream>
 #include <vector>
-#include "Charge.h"
 
 // ── 构造函数测试 ──
 

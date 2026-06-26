@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
+import WageSystem;
 #include <sstream>
 #include <vector>
-#include "Staff.h"
 
 // ── 构造函数测试 ──
 

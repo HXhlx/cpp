@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
+import WageSystem;
 #include <fstream>
 #include <list>
 #include <sstream>
-#include "Administrator.h"
 
 // ── 构造函数测试 ──
 

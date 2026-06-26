@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "Database.h"
+import WageSystem;
 
 class DatabaseTest : public ::testing::Test {
 protected:

@@ -1,8 +1,9 @@
+module;
 #include <algorithm>
 #include <iostream>
 #include <string>
 #include <vector>
-#include "Staff.h"
+module WageSystem;
 
 Staff::Staff(unsigned w, const std::string& i, const std::string& n)
     : id_(i), name_(n), wage_(w) {}
@@ -111,9 +112,6 @@ void Staff::Print() const {
               << std::endl;
 }
 
-bool operator==(const Staff& a, const Staff& b) {
-    return a.id_ == b.id_;
-}
 
 void Staff::Change() {
     std::string k, p;

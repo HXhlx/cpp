@@ -1,3 +1,14 @@
 build/
 *.db
 *.bin
+build-ninja/
+gcm.cache/
+*.gcm
+*.o
+wage_mgmt
+wage_tests
+wage.db
+mod_test.*
+mod_use*.cpp
+mod_use*.o
+mod_use3

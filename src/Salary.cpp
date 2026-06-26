@@ -1,7 +1,8 @@
+module;
 #include <algorithm>
 #include <iostream>
 #include <vector>
-#include "Salary.h"
+module WageSystem;
 
 Salary::Salary(unsigned w, const std::string& i, const std::string& n,
                double ba, double d, double bo)
