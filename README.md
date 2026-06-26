@@ -5,25 +5,28 @@ C++ 课程大作业 — 公司工资管理控制台应用
 ## 项目结构
 
 ```
-├── CMakeLists.txt          # 构建配置
-├── include/                # 头文件
-│   ├── Staff.h             # 员工基类
-│   ├── Salary.h            # 工资类（继承 Staff）
-│   ├── Charge.h            # 费用类（继承 Salary）
-│   └── Administrator.h     # 管理员类
-├── src/                    # 源文件
-│   ├── Main.cpp            # 主程序入口
+├── CMakeLists.txt              # 构建配置
+├── include/                    # 头文件
+│   ├── Staff.h                 # 员工基类
+│   ├── Salary.h                # 工资类（继承 Staff）
+│   ├── Charge.h                # 费用类（继承 Salary）
+│   ├── Administrator.h         # 管理员类
+│   └── Database.h              # SQLite 数据库封装
+├── src/                        # 源文件
+│   ├── Main.cpp                # 主程序入口
 │   ├── Staff.cpp
 │   ├── Salary.cpp
 │   ├── Charge.cpp
-│   └── Administrator.cpp
-├── tests/                  # 单元测试（Google Test）
+│   ├── Administrator.cpp
+│   └── Database.cpp            # SQLite CRUD 实现
+├── tests/                      # 单元测试（Google Test）
 │   ├── test_staff.cpp
 │   ├── test_salary.cpp
 │   ├── test_charge.cpp
-│   └── test_administrator.cpp
-├── administrator.bin       # 管理员数据文件
-└── staff.bin               # 员工数据文件
+│   ├── test_administrator.cpp
+│   └── test_database.cpp
+└── third_party/
+    └── sqlite/                 # SQLite 源码（amalgamation）
 ```
 
 ## 构建
@@ -34,11 +37,17 @@ cmake ..
 cmake --build .
 ```
 
+## 初始化数据库
+
+首次运行需要创建管理员账号：
+
+```bash
+sqlite3 wage.db "INSERT INTO admin VALUES('admin','123456');"
+```
+
 ## 运行
 
 ```bash
-# 从项目根目录运行（需要读取 .bin 数据文件）
-cd /path/to/cpp
 ./build/wage_mgmt
 ```
 

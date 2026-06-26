@@ -1,11 +1,10 @@
 #include <algorithm>
-#include <fstream>
 #include <iostream>
 #include <list>
-#include <sstream>
 #include <vector>
 #include "Administrator.h"
 #include "Charge.h"
+#include "Database.h"
 #include "Salary.h"
 #include "Staff.h"
 
@@ -42,7 +41,7 @@ static void PrintMenu(int role) {
     std::cout << "请选择操作:";
 }
 
-static bool AddEmployee(std::vector<Charge>& staff) {
+static bool AddEmployee(Database& db, std::vector<Charge>& staff) {
     char c;
     Charge s;
     do {
@@ -56,6 +55,7 @@ static bool AddEmployee(std::vector<Charge>& staff) {
             return false;
         }
         staff.push_back(s);
+        db.AddStaff(s);
         std::cout << "是否继续添加员工?(y or n):";
         std::cin >> c;
     } while (c == 'y');
@@ -63,6 +63,7 @@ static bool AddEmployee(std::vector<Charge>& staff) {
 }
 
 static void ModifyEmployee(Administrator& administrator,
+                           Database& db,
                            std::vector<Charge>& staff, int t) {
     char c;
     Charge s;
@@ -79,43 +80,30 @@ static void ModifyEmployee(Administrator& administrator,
             it->Salary::Modify();
         else if (t == 6)
             it->Modify();
+        db.UpdateStaff(*it);
         std::cout << "是否继续修改?(y or n):";
         std::cin >> c;
     } while (c == 'y');
 }
 
-static void SaveAndExit(std::fstream& ainout, std::fstream& uinout,
+static void SaveAndExit(Database& db,
                         std::list<Administrator>& adm,
                         std::vector<Charge>& staff) {
-    ainout.close();
-    ainout.open("administrator.bin", std::fstream::out);
-    uinout.close();
-    uinout.open("staff.bin", std::fstream::out);
-    if (ainout.fail() || uinout.fail()) {
-        std::cerr << "文件打开失败,程序将异常退出";
-        return;
-    }
-    Administrator::Save(ainout, adm);
-    if (adm.empty()) {
-        std::cout << "管理员为空,系统将清除所有用户信息!";
-    } else {
-        Charge::Save(uinout, staff);
-        std::cout << "退出成功,信息已保存";
-    }
+    db.SaveAll(adm, staff);
+    std::cout << "退出成功,信息已保存";
 }
 
 static bool RunAdminMenu(Administrator& administrator,
+                         Database& db,
                          std::vector<Charge>& staff,
-                         std::list<Administrator>& adm,
-                         std::fstream& ainout,
-                         std::fstream& uinout) {
+                         std::list<Administrator>& adm) {
     int t;
     PrintMenu(1);
     while (std::cin >> t) {
         std::cout << "\n";
         switch (t) {
         case 1:
-            AddEmployee(staff);
+            AddEmployee(db, staff);
             break;
         case 2:
             for (auto& s : staff) s.Salary::Input();
@@ -126,7 +114,7 @@ static bool RunAdminMenu(Administrator& administrator,
         case 4:
         case 5:
         case 6:
-            ModifyEmployee(administrator, staff, t);
+            ModifyEmployee(administrator, db, staff, t);
             break;
         case 7: {
             std::vector<Staff> sta(staff.begin(), staff.end());
@@ -147,9 +135,24 @@ static bool RunAdminMenu(Administrator& administrator,
         case 11:
             Charge::Statistics(staff);
             break;
-        case 12:
-            Charge().Delete(staff);
+        case 12: {
+            Charge to_del;
+            to_del.BasicIn();
+            auto it = std::find(staff.begin(), staff.end(), to_del);
+            if (it == staff.end()) {
+                std::cerr << "删除失败\n";
+            } else {
+                std::cout << "你是否要删除该员工信息?y/n\n";
+                char c;
+                std::cin >> c;
+                if (c == 'y') {
+                    db.DeleteStaff(it->GetId());
+                    staff.erase(it);
+                    std::cout << "删除成功\n";
+                }
+            }
             break;
+        }
         case 13:
             administrator.Change(adm);
             break;
@@ -159,12 +162,11 @@ static bool RunAdminMenu(Administrator& administrator,
         case 15: {
             bool self_deleted = administrator.Delete(adm);
             if (!self_deleted) break;
-            // 删除了自己 → 保存退出
-            SaveAndExit(ainout, uinout, adm, staff);
+            SaveAndExit(db, adm, staff);
             return true;
         }
         case 16:
-            SaveAndExit(ainout, uinout, adm, staff);
+            SaveAndExit(db, adm, staff);
             return true;
         default:
             return false;
@@ -175,7 +177,7 @@ static bool RunAdminMenu(Administrator& administrator,
 }
 
 static bool RunStaffMenu(std::vector<Charge>& staff,
-                         std::fstream& uinout, int n) {
+                         Database& db, int n) {
     int t;
     PrintMenu(2);
     while (std::cin >> t) {
@@ -197,9 +199,7 @@ static bool RunStaffMenu(std::vector<Charge>& staff,
             staff[n].Change();
             break;
         case 6:
-            uinout.close();
-            uinout.open("staff.bin", std::fstream::out);
-            Charge::Save(uinout, staff);
+            db.SaveAll({}, staff);
             std::cout << "退出成功,信息已保存";
             return true;
         default:
@@ -211,66 +211,47 @@ static bool RunStaffMenu(std::vector<Charge>& staff,
 }
 
 int main() {
-    std::string a, u;
+    std::string a;
     int i = 1;
-    std::fstream ainout("administrator.bin"), uinout("staff.bin");
-    std::list<Administrator> adm;
-    std::vector<Charge> staff;
 
-    if (ainout.fail() || uinout.fail()) {
-        std::cerr << "公司已倒闭，数据已清空";
-        return EXIT_FAILURE;
-    }
+    Database db("wage.db");
+    std::list<Administrator> adm = db.LoadAllAdmins();
+    std::vector<Charge> staff = db.LoadAllStaff();
 
-    ainout >> a;
-    uinout >> u;
-
-    if (a.empty()) {
+    if (adm.empty()) {
         std::cerr << "系统找不到管理员信息,程序无法使用";
         return EXIT_FAILURE;
     }
 
-    if (!u.empty()) {
+    if (!staff.empty()) {
         std::cout << "请选择登录方式:(1.管理员登录\t2.用户登录)\n";
         std::cin >> i;
     }
 
-    // staff 文件为空时直接进入添加流程
-    if (u.empty()) {
-        ainout.seekg(0);
-        Administrator::In(ainout, adm);
+    // staff 为空时直接进入添加流程
+    if (staff.empty()) {
         Administrator administrator = Administrator::Login(adm);
         if (administrator == Administrator()) {
             std::cerr << "登录名或密码错误\n";
             return EXIT_FAILURE;
         }
-        AddEmployee(staff);
-        RunAdminMenu(administrator, staff, adm, ainout, uinout);
+        AddEmployee(db, staff);
+        RunAdminMenu(administrator, db, staff, adm);
         return EXIT_SUCCESS;
     }
 
-    ainout.seekg(0);
-    uinout.seekg(0);
-
     for (int attempt = 0; attempt < 3; ++attempt) {
         if (i == 1) {
-            Administrator::In(ainout, adm);
             Administrator administrator = Administrator::Login(adm);
             if (!(administrator == Administrator())) {
-                char c = 'n';
-                std::cout << "检测到系统中已存在用户文件,是否需要打开文件进行操作?\n"
-                          << "y:是,我想打开文件\tn:否,我想直接输入,并替换掉原有文件\n";
-                std::cin >> c;
-                if (c == 'y') Charge::In(uinout, staff);
-                RunAdminMenu(administrator, staff, adm, ainout, uinout);
+                RunAdminMenu(administrator, db, staff, adm);
                 return EXIT_SUCCESS;
             }
             std::cerr << "登录名或密码错误,请重新输入\n";
         } else if (i == 2) {
-            Charge::In(uinout, staff);
             int n = Charge::Login(staff);
             if (n != EOF) {
-                RunStaffMenu(staff, uinout, n);
+                RunStaffMenu(staff, db, n);
                 return EXIT_SUCCESS;
             }
             std::cerr << "工资卡号/姓名/身份证号或密码错误,请重新输入\n";

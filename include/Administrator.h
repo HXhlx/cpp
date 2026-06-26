@@ -27,6 +27,8 @@ public:
     bool Delete(std::list<Administrator>& adm);
     void Input(std::list<Administrator>& adm);
     void ModifyStaff(Staff& s) const;
+    const std::string& GetName() const { return name_; }
+    const std::string& GetPassword() const { return password_; }
 };
 
 #endif // ADMINISTRATOR_H

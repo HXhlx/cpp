@@ -7,6 +7,7 @@
 class Staff {
     friend class Administrator;
     friend bool operator==(const Staff& a, const Staff& b);
+    friend class Database;
 
 #ifdef ENABLE_TEST_ACCESS
 public:
@@ -28,6 +29,7 @@ public:
     void Print() const;
     void Change();
     void Modify();
+    const std::string& GetId() const { return id_; }
 };
 
 #endif // STAFF_H

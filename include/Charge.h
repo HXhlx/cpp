@@ -5,6 +5,7 @@
 #include "Salary.h"
 
 class Charge : public Salary {
+    friend class Database;
 
 #ifdef ENABLE_TEST_ACCESS
 public:
